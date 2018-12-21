@@ -1,8 +1,5 @@
 let dataParser = (function() {
 
-  const FONTS_API_KEY = 'AIzaSyChIENACvOODK1DcDg41prx1IxZ3EwpP0s';
-  const FONTS_API_BASEURL = 'https://www.googleapis.com/webfonts/v1/webfonts?sort=popularity&key=';
-
   let googleFontsData = [];
   let processedFontData = [];
 
