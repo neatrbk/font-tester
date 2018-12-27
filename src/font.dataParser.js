@@ -1,7 +1,100 @@
 let dataParser = (function() {
+  'use strict';
 
   let googleFontsData = [];
-  let processedFontData = [];
+  
+  function Font(fontFamily, backupFont, isDisplay, order, body) {
+      this.fontFamily = fontFamily;
+      this.backupFont = backupFont;
+      this.isDisplay = isDisplay;
+      this.order = order;
+      this.body = body;
+  }
+
+  function FontList(fontsAr, pairsAr) {
+      this.fonts = fontsAr;
+      this.pairs = pairsAr;
+  }  
+
+  FontList.prototype.buildFontData = function(googleFontData) {
+    let fontData = [];
+    googleFontData.forEach((f) => {
+      let font = new Font(
+          f.family,
+          null,
+          f.category == 'display' ? true : false,
+          null,
+          null
+        );
+
+      fontData.push(font);
+    });
+    this.fonts = fontData;
+  }
+
+  FontList.prototype.buildPairData = function() {
+    let pairData = [];
+
+    if(this.fonts.length < 1) {
+      console.error('cannot build pair data without font data, use fontList.buildFontData to do so.');
+    }
+    
+    this.fonts.forEach((f) => {
+      const prop = f.isDisplay ? 'display' : 'text';
+
+      if(f.order == null) {
+        this.applyOrder();
+      }
+
+      if(pairData[f.order]) {
+        let halfPair = pairData[f.order];
+        halfPair[prop] = f;
+      }
+      else {
+        pairData[f.order] = new Object;
+        pairData[f.order][prop] = f;
+      }
+    });
+   this.pairs = pairData; 
+  }
+
+  FontList.prototype.applyOrder = function() {
+    let curDisplayOrder = 0;
+    let curTextOrder = 0;
+    this.fonts.forEach((f) => {
+      if(f.isDisplay) {
+        f.order = curDisplayOrder;
+        curDisplayOrder ++;
+      }
+      else {
+        f.order = curTextOrder;
+        curTextOrder++;
+      }
+    });
+  }
+
+  FontList.prototype.randomize = function() {
+    randomizeArray(this.fonts);
+    this.applyOrder();
+  }
+  
+  FontList.prototype.setFonts = function(fontsAr) {
+    this.fonts = fontsAr; 
+  }
+
+  FontList.prototype.addFont = function(font) {
+    this.fonts.push(font);
+  }
+
+  
+
+  function randomizeArray(ar) {
+    let newAr = ar.slice();
+    for(let i = newAr.length - 1; i > 0; i --) {
+      let j = Math.floor(Math.random() * (i + 1));
+      newAr[i], newAr[j] = newAr[j], newAr[i];
+    }
+  }
 
   async function getGoogleFonts() {
      let fontData = {};
@@ -24,59 +117,17 @@ let dataParser = (function() {
     return filteredFonts;
   }
 
-  function randomizeArray(ar) {
-    let newAr = ar.slice();
-    for(let i = newAr.length - 1; i > 0; i --) {
-      let j = Math.floor(Math.random() * (i + 1));
-      newAr[i], newAr[j] = newAr[j], newAr[i];
-    }
-  }
-
-  function processFontData(googleFontsData) {
-    googleFontsData.forEach((f, i) => {
-      processedFontData.push(
-        {
-          fontFamily: f.family,
-          backupFont: null, 
-          isDisplay: (f.category == 'display') ? true : false,
-          order: i, 
-          body: null
-        }
-      );
-    })
-    return processedFontData;
-  }
-
-  function pairFonts(processedFontData) {
-    let pairData = [];
-
-    processedFontData.forEach((f) => {
-      const prop = f.isDisplay ? 'display' : 'text';
-
-      if(pairData[f.order]) {
-        let halfPair = pairData[f.order];
-        halfPair[prop] = f;
-      }
-      else {
-        pairData[f.order] = new Object;
-        pairData[f.order][prop] = f;
-      }
-    });
-
-    return pairData;
-  }
-
   async function getData(fontNames) {
-      let data = [];
-
       googleFontsData = await getGoogleFonts();
-      googleFontsData = filterFontData(fontNames);
-      data = processFontData(googleFontsData);
-      data = pairFonts = pairFonts();
+      console.log(googleFontsData);
+      let filteredFonts = filterFontData(fontNames);
+      let fontData = new FontList();
+      fontData.buildFontData(filteredFonts);
+      fontData.buildPairData(fontData.fonts);
+
+      console.log(fontData);
     
-      return processedFonts;
     }
 
-    console.log(getData(['Roboto', 'Unlock']));
+    getData(['Roboto', 'Unlock','Monoton','Arvo', 'Bangers', 'Gruppo']);
 })();
-
