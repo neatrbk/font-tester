@@ -6,21 +6,33 @@
   color: #f2f3e6;
 }
 
+body {
+  background-color: #ED2939; 
+  min-width: 320px;
+}
+
 .container {
   display: grid;
-  background-color: #ED2939; 
+  width: 95%;
+  margin: 0px auto;
+
 }
 
-.display--fonts {
-  grid-column-start: 2;
-  grid-column-end: 3;
+.container--side-by-side {
+  grid-template-columns: min-content 1fr; 
 }
 
-.text--fonts {
-  grid-column-start: 4;
-  grid-column-end: 5;
+.font {
+  
 }
 
-.font--pair {
-  grid-template-columns: 3% 1fr 3% 1.61803fr 3%;
+.title--el {
+  grid-column: 1 / -1;
+  font-size: 7.88vw;
 }
+
+.text--el {
+  grid-column: 1 / -1;
+  font-size: 3vw;
+}
+

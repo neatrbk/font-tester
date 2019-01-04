@@ -1,4 +1,4 @@
-let dataParser = (function() {
+let FontList = (function() {
   'use strict';
 
   let googleFontsData = [];
@@ -11,25 +11,49 @@ let dataParser = (function() {
       this.body = body;
   }
 
-  function FontList(fontsAr, pairsAr) {
-      this.fonts = fontsAr;
-      this.pairs = pairsAr;
+  function FontList() {
+      this.fonts = [];
+      this.pairs = [];
+  }
+  
+  FontList.prototype.addFont = function(fontFamily, backupFont, isDisplay, order, body) {
+    if(!this.fonts) {
+      this.fonts = [];
+    }
+    let newFont = new Font(fontFamily, backupFont, isDisplay, order, body);
+    this.fonts.push(newFont);
   }  
 
+  FontList.prototype.initialize = async function(fontNames) {
+    googleFontsData = await getGoogleFonts();
+    let filteredFonts = filterFontData(fontNames);
+    this.buildFontData(filteredFonts);
+    this.buildPairData(this.fonts);
+    
+    return new Promise((resolve, reject) => {
+      if(this.fonts.length > 0) {
+        if(this.fonts.length !== fontNames.length) {
+          console.warn('WARNING: All fonts were not resolved.');
+        } 
+        resolve();
+      }
+      else {
+        console.error('No fonts were returned');
+        reject();
+      }
+    });
+  }
+
   FontList.prototype.buildFontData = function(googleFontData) {
-    let fontData = [];
     googleFontData.forEach((f) => {
-      let font = new Font(
+      this.addFont(
           f.family,
           null,
           f.category == 'display' ? true : false,
           null,
           null
         );
-
-      fontData.push(font);
     });
-    this.fonts = fontData;
   }
 
   FontList.prototype.buildPairData = function() {
@@ -73,6 +97,8 @@ let dataParser = (function() {
     });
   }
 
+  //The following methods could be useful, but need reworking
+
   FontList.prototype.randomize = function() {
     randomizeArray(this.fonts);
     this.applyOrder();
@@ -81,12 +107,6 @@ let dataParser = (function() {
   FontList.prototype.setFonts = function(fontsAr) {
     this.fonts = fontsAr; 
   }
-
-  FontList.prototype.addFont = function(font) {
-    this.fonts.push(font);
-  }
-
-  
 
   function randomizeArray(ar) {
     let newAr = ar.slice();
@@ -98,6 +118,7 @@ let dataParser = (function() {
 
   async function getGoogleFonts() {
      let fontData = {};
+
      try{
        fontData = await fetch(FONTS_API_BASEURL + FONTS_API_KEY);
        fontData = await fontData.json();
@@ -110,24 +131,16 @@ let dataParser = (function() {
   }
   
   function filterFontData(fontsAr) {
-    let filteredFonts = googleFontsData.filter((f) => {
-      return fontsAr.indexOf(f.family) !== -1;
-    }); 
+    let names = fontsAr.map((f) => {
+      return f.toLowerCase();
+    });
 
+    let filteredFonts = googleFontsData.filter((f) => {
+      return names.indexOf(f.family.toLowerCase()) !== -1;
+    }); 
     return filteredFonts;
   }
 
-  async function getData(fontNames) {
-      googleFontsData = await getGoogleFonts();
-      console.log(googleFontsData);
-      let filteredFonts = filterFontData(fontNames);
-      let fontData = new FontList();
-      fontData.buildFontData(filteredFonts);
-      fontData.buildPairData(fontData.fonts);
 
-      console.log(fontData);
-    
-    }
-
-    getData(['Roboto', 'Unlock','Monoton','Arvo', 'Bangers', 'Gruppo']);
+  return FontList;
 })();
