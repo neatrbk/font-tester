@@ -2,14 +2,6 @@ let FontList = (function() {
   'use strict';
 
   let googleFontsData = [];
-  
-  function Font(fontFamily, backupFont, isDisplay, order, body) {
-      this.fontFamily = fontFamily;
-      this.backupFont = backupFont;
-      this.isDisplay = isDisplay;
-      this.order = order;
-      this.body = body;
-  }
 
   function FontList() {
       this.fonts = [];
@@ -29,6 +21,7 @@ let FontList = (function() {
     let filteredFonts = filterFontData(fontNames);
     this.buildFontData(filteredFonts);
     this.buildPairData(this.fonts);
+    initializeFontBodys(this);
     
     return new Promise((resolve, reject) => {
       if(this.fonts.length > 0) {
@@ -106,7 +99,9 @@ let FontList = (function() {
   
   FontList.prototype.setFonts = function(fontsAr) {
     this.fonts = fontsAr; 
-  }
+  } 
+
+  //Private -- General
 
   function randomizeArray(ar) {
     let newAr = ar.slice();
@@ -116,6 +111,22 @@ let FontList = (function() {
     }
   }
 
+  function initializeFontBodys(fontList) {
+    if (typeof fontList !== 'array') {
+      fontList = fontList.fonts;
+    }
+
+    fontList.forEach((f) => {
+      if(f.isDisplay) {
+        f.setBody("MASTERMIND");
+      }
+      else {
+        f.setBody("Aparently we had reached a great height in the atmosphere, for the sky was a dead black, and the stars had ceased to twinkle. By the same illusion which lifts the horizon of the sea to the level of the spectator on a hillside, the sable cloud beneath was dished out, and the car seemed to float in the middle of an immense dark sphere, whose upper half was strewn with silver. Looking down into the dark gulf below, I could see a ruddy light streaming through a rift in the clouds.");
+      }
+    }); 
+  }
+
+  // Private -- Google Fonts specific
   async function getGoogleFonts() {
      let fontData = {};
 
@@ -140,7 +151,6 @@ let FontList = (function() {
     }); 
     return filteredFonts;
   }
-
 
   return FontList;
 })();

@@ -1,7 +1,7 @@
 let fonts = new FontList();
-fonts.initialize(['Unlock', 'Roboto', 'Charm', 'Roboto Condensed', 'Droid Sans'])
+fonts.initialize(['staatliches', 'lobster', 'roboto', 'lato', 'ovo'])
                     .then(() => {
-                        display.standard(fonts.pairs[0]);
+                        display.stacked(fonts, '.container');
                     });
 
 

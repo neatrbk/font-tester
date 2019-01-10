@@ -12,8 +12,7 @@ body {
 }
 
 .container {
-  display: grid;
-  width: 95%;
+  width: 85%;
   margin: 0px auto;
 
 }
@@ -22,17 +21,13 @@ body {
   grid-template-columns: min-content 1fr; 
 }
 
-.font {
-  
+.display--font {
+  font-size: 6.88vw;
+  padding: 40px 0;
 }
 
-.title--el {
-  grid-column: 1 / -1;
-  font-size: 7.88vw;
-}
-
-.text--el {
-  grid-column: 1 / -1;
-  font-size: 3vw;
+.text--font {
+  font-size: 2.0vw;
+  line-height: 2em; 
 }
 

@@ -1,24 +1,20 @@
 const display = (function() {
 
     const DefaultFont = 'sans-serif';
-    const parentContainerSelector = '.container';
 
-    function buildFontElement(f) {
-        const elType = (f.isDisplay) ? 'h1' : 'p';
-        const fontSize = (f.isDisplay) ? '7.88vw' : '3vw';
-        const classification = (f.isDisplay) ? 'title' : 'text';
+    function buildFontElement(font) {
+        const elType = (font.isDisplay) ? 'h1' : 'p';
+        const classification = (font.isDisplay) ? 'display--font' : 'text--font';
 
         let el = document.createElement(elType);
-        //DO we want to style with class with js?????????????????????????????????????????????????????????????
-        el.style.fontFamily = f.fontFamily;
-        el.style.fontSize = fontSize;
+        el.style.fontFamily = font.fontFamily;
         el.classList.add(classification);
-        el.innerHTML = (f.body) ? f.body : 'testing';
+        el.innerHTML = (font.body) ? font.body : 'testing';
 
         return el;
     } 
 
-    function displayStandard(fontPair) {
+    function displayStandard(fontPair, containerSelector) {
         if(!fontPair.text || !fontPair.display) {
             console.warn('Warning: the font pair only contains a single font. A default font will be used.');
         }
@@ -29,11 +25,69 @@ const display = (function() {
         const textElement = (fontPair.text) ? buildFontElement(fontPair.text) : 
                                               buildFontElement(new Font(DefaultFont, null, false, null, null));
         
-        const parentElement = document.querySelector(parentContainerSelector);
-        console.log(parentElement);
+        const parentElement = document.querySelector(containerSelector);
 
-       parentElement.appendChild(displayElement); 
-       parentElement.appendChild(textElement);
+        parentElement.appendChild(displayElement); 
+        parentElement.appendChild(textElement);
+    }
+
+    function displayOffset(fontPair, containerSelector) {
+        displayStandard(fontPair, containerSelector);
+        document.querySelector('.text--font').style.paddingLeft = '2.7em';
+    }
+
+    async function displayStacked(fontList, containerSelector) {
+        await loadFonts(fontList);
+        const parentContainer = document.querySelector(containerSelector);
+        let containerRows = 0;
+        let containerCols = 2;
+        parentContainer.style.display = 'grid';
+
+        fontList.pairs.forEach((p) => {
+            if(!p.text || !p.display) {
+                console.warn('Warning: the font pair only contains a single font. A default font will be used.');
+            }
+
+            const displayElement = (p.display) ? buildFontElement(p.display) :
+                                                 buildFontElement(new Font(DefaultFont, null, true, null, 'no body specified'));
+        
+            const textElement = (p.text) ? buildFontElement(p.text) :
+                                           buildFontElement(new Font(DefaultFont, null, false, null, 'no body specified'));
+
+            displayElement.style.padding = '0';
+            parentContainer.appendChild(displayElement); 
+            parentContainer.appendChild(textElement);
+
+            containerRows ++;
+        });
+
+        parentContainer.style.gridTemplateColumns = `repeat(${containerCols}, 1fr)`;
+        parentContainer.style.gridTemplateRows = `repeat(${containerRows}, 1fr)`;
+        parentContainer.style.columnGap = '3em';
+        parentContainer.style.rowGap = '3em';
+    }
+
+    async function loadFonts(fontData) {
+        if(typeof fontData !== 'array') {
+            fontData = fontData.fonts;
+        }
+        const fontNames = fontData.map((f) => {
+            return f.fontFamily;
+        });
+
+        const WebFontConfig = {
+            google: {
+                families: fontNames
+            },
+            timeout: 6000,
+            loading: function() {
+                console.log('fonts are loading, however this console message should be replaced by a loader');
+            },
+            active: function () {
+                console.log('fonts have been loaded');
+            }
+        }
+        WebFont.load(WebFontConfig);
     }
 
 
@@ -66,7 +120,9 @@ const display = (function() {
     }
 
     return {
-        standard: displayStandard
+        standard: displayStandard,
+        offset: displayOffset,
+        stacked: displayStacked
     }
 
 })();
